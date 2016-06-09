@@ -1,8 +1,13 @@
 # dom-factory
 
-<!-- [![npm version](https://badge.fury.io/js/dom-factory.svg)](https://badge.fury.io/js/dom-factory) -->
+[![npm version](https://badge.fury.io/js/dom-factory.svg)](https://badge.fury.io/js/dom-factory)
 
-The DOM factory provides a convenient API to enhance HTML elements with custom behavior, using plain JavaScript objects with advanced features like property change observers and property reflection to attributes on HTML elements. 
+The DOM factory provides a convenient API (inspired by Polymer) to enhance HTML elements with custom behavior, using plain JavaScript objects with advanced features like property change observers, property reflection to attributes on HTML elements and simplify mundane tasks like adding and removing event listeners.
+
+## Compatibility
+
+- Supports ES5-compliant browsers (IE9+)
+- Doesn't require any dependencies or polyfills
 
 ## Installation
 
@@ -37,9 +42,9 @@ import { factory } from 'dom-factory'
 
 ### Components
 
-The following example illustrates a button component using properties, observers and listeners (ES6).
+The following ES6 example, illustrates a component definition for an enhanced button using properties as a public API, property reflection to attributes, property change observers and event listeners.
 
-#### Component factory
+#### Component definition
 
 ```js
 const buttonComponent = (element) => {
@@ -132,7 +137,7 @@ const buttonComponent = (element) => {
 
 #### Component reference
 
-Attach the component to a HTML element and create a component reference which we can then use to interact with.
+Attach the component to a HTML element and create a component reference which we can then use to interact with the component.
 
 ```html
 <button>Press me</button>
