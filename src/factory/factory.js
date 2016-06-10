@@ -2,7 +2,7 @@ import { watch, unwatch } from 'watch-object'
 
 const isElement = (el) => (el instanceof HTMLElement)
 
-const isObject = (obj) => ({}.toString.call(obj) === '[object Array]')
+const isArray = (obj) => ({}.toString.call(obj) === '[object Array]')
 
 const isFunction = (fn) => typeof fn === 'function'
 
@@ -136,7 +136,7 @@ const makeProperties = (src) => {
  * @return {Array<Object(fn, args)>}
  */
 const observers = (src) => {
-  if ({}.toString.call(src.observers) !== '[object Array]') {
+  if (!isArray(src.observers)) {
     return []
   }
   return src.observers.map(sig => {
@@ -169,9 +169,6 @@ const dotObjectPropParent = (str, obj) => {
  * @param  {Object} src The source object
  */
 const makeObservers = (src) => {
-  if ({}.toString.call(src.observers) !== '[object Array]') {
-    return
-  }
   observers(src).forEach(({ fn, args }) => {
     src[fn] = src[fn].bind(src)
     args.forEach(arg => {
@@ -192,7 +189,7 @@ const makeObservers = (src) => {
  * @return {Array<Object(element, fn, events)>}
  */
 const listeners = (src) => {
-  if (!isObject(src.listeners)) {
+  if (!isArray(src.listeners)) {
     return []
   }
   return src.listeners.map(sig => {
@@ -232,7 +229,6 @@ const makeListeners = (src) => {
 export const factory = (factory) => {
   if (!factory || 
     typeof factory !== 'object' || 
-    factory.element === undefined || 
     !isElement(factory.element)) {
     console.error('[dom-component] Invalid factory.')
     return
@@ -314,17 +310,30 @@ export const factory = (factory) => {
      * @param  {String} eventName The event name
      */
     fire (eventName) {
-      let event = document.createEvent('Event')
-      event.initEvent(eventName, true, true)
+      let event
+      if ('CustomEvent' in window && typeof window.CustomEvent === 'object') {
+        event = new CustomEvent(eventName, {
+          bubbles: true,
+          cancelable: false
+        })
+      }
+      else {
+        event = document.createEvent('Event')
+        event.initEvent(eventName, true, true)
+      }
       this.element.dispatchEvent(event)
     }
   }
 
   makeProperties(factory)
 
-  return assign(
+  component = assign(
     {},
     factory,
     component
   )
+
+  component.init()
+
+  return component
 }

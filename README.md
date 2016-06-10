@@ -7,7 +7,6 @@ The DOM factory provides a convenient API (inspired by Polymer) to enhance HTML 
 ## Compatibility
 
 - Supports ES5-compliant browsers (IE9+)
-- Doesn't require any dependencies or polyfills
 
 ## Installation
 
@@ -24,20 +23,20 @@ The DOM factory library exports to AMD, CommonJS and global.
 ```html
 <script src="node_modules/dom-factory/dist/dom-factory.js"></script>
 <script>
-  var factory = domFactory.factory
+  var handler = domFactory.handler
 </script>
 ```
 
 ### CommonJS
 
 ```js
-var factory = require('dom-factory').factory
+var handler = require('dom-factory').handler
 ```
 
 ### ES6
 
 ```js
-import { factory } from 'dom-factory'
+import { handler } from 'dom-factory'
 ```
 
 ### Components
@@ -46,109 +45,118 @@ The following ES6 example, illustrates a component definition for an enhanced bu
 
 #### Component definition
 
-```js
-const buttonComponent = (element) => {
-  let component = factory({
+A component definition is nothing more than a simple object factory (a function that creates an object) which accepts a `HTMLElement` node as it's argument.
 
-    // The HTMLElement
-    element,
+```js
+/**
+ * A component definition
+ * @param  {HTMLElement} element
+ * @return {Object}
+ */
+const buttonComponent = (element) => ({
+  element,
+
+  /**
+   * Properties part of the component's public API.
+   * @type {Object}
+   */
+  properties: {
 
     /**
-     * Properties part of the component's public API.
+     * Maps to [a-property="value"] attribute
+     * Also sets a default property value 
+     * and updates the attribute on the HTMLElement
      * @type {Object}
      */
-    properties: {
-
-      /**
-       * Maps to [a-property="value"] attribute
-       * Also sets a default property value 
-       * and updates the attribute on the HTMLElement
-       * @type {Object}
-       */
-      aProperty: {
-        reflectToAttribute: true,
-        value: 'value for aProperty'
-      },
-
-      /**
-       * Maps to [b-property] attribute
-       * It removes the attribute when the property value is `false`
-       * @type {Object}
-       */
-      bProperty: {
-        type: Boolean,
-        reflectToAttribute: true
-      }
+    aProperty: {
+      reflectToAttribute: true,
+      value: 'value for aProperty'
     },
 
     /**
-     * Property change observers.
-     * @type {Array}
+     * Maps to [b-property] attribute
+     * It removes the attribute when the property value is `false`
+     * @type {Object}
      */
-    observers: [
-      '_onPropertyChanged(aProperty, bProperty)'
-    ],
+    bProperty: {
+      type: Boolean,
+      reflectToAttribute: true
+    }
+  },
 
-    /**
-     * Event listeners.
-     * @type {Array}
-     */
-    listeners: [
-      '_onClick(click)'
-    ],
+  /**
+   * Property change observers.
+   * @type {Array}
+   */
+  observers: [
+    '_onPropertyChanged(aProperty, bProperty)'
+  ],
 
-    /**
-     * Property change observer handler
-     * @param  {?}      newValue The new property value
-     * @param  {?}      oldValue The old property value
-     * @param  {String} propName The property name
-     */
-    _onPropertyChanged (newValue, oldValue, propName) {
-      switch (propName) {
-        case 'aProperty':
-          console.log('aProperty has changed', newValue, oldValue)
-          break
-        case 'bProperty':
-          console.log('bProperty has changed', newValue, oldValue)
-          break
-      }
+  /**
+   * Event listeners.
+   * @type {Array}
+   */
+  listeners: [
+    '_onClick(click)'
+  ],
 
-      // access from context, with the new values
-      console.log(this.aProperty, this.bProperty)
-    },
-
-    /**
-     * Click event listener
-     * @param  {MouseEvent} event The Mouse Event
-     */
-    _onClick (event) {
-      event.preventDefault()
-      console.log('The button was clicked!')
+  /**
+   * Property change observer handler
+   * @param  {?}      newValue The new property value
+   * @param  {?}      oldValue The old property value
+   * @param  {String} propName The property name
+   */
+  _onPropertyChanged (newValue, oldValue, propName) {
+    switch (propName) {
+      case 'aProperty':
+        console.log('aProperty has changed', newValue, oldValue)
+        break
+      case 'bProperty':
+        console.log('bProperty has changed', newValue, oldValue)
+        break
     }
 
-  })
+    // access from context, with the new values
+    console.log(this.aProperty, this.bProperty)
+  },
 
-  // Initialize the component
-  component.init()
-
-  return component
-}
+  /**
+   * Click event listener
+   * @param  {MouseEvent} event The Mouse Event
+   */
+  _onClick (event) {
+    event.preventDefault()
+    console.log('The button was clicked!')
+  }
+})
 ```
 
-#### Component reference
+#### Register the component
 
-Attach the component to a HTML element and create a component reference which we can then use to interact with the component.
+```js
+handler.register('my-button', buttonComponent)
+```
+
+#### Initialize the component
+
+The component handler attempts to self-initialize all registered components which match the component CSS class. The CSS class is computed automatically from the component ID which was provided at registration.
+
+In this example, since we registered the `buttonComponent` with a component ID of `my-button`, the handler will try to initialize all the HTML elements which have the `my-js-button` CSS class.
 
 ```html
-<button>Press me</button>
+<button class="my-js-button">Press me</button>
 ```
+
+#### Interact with the component API
+
+When the handler initializes a component on a HTML element, a reference to the created component is stored as a property on the HTML element, matching the `camelCase` version of the component ID.
 
 ```js
 var buttonNode = document.querySelector('button')
-var button = buttonComponent(buttonNode)
+var button = buttonNode.myButton
 ```
 
-Interact with the component's API.
+We can use this reference to interact with the component's API.
 
 ```js
 console.log(button.aProperty)
@@ -167,7 +175,7 @@ When using the `reflectToAttribute: true` property option, the property reflects
 When using a `Boolean` property type and assigning a property value of `true`, the attribute will be created with the same value as the attribute name and when assigning a property value of `false`, the attribute will be removed from the DOM.
 
 ```html
-<button a-property="something else" b-property="b-property">
+<button class="my-js-button" a-property="something else" b-property="b-property">
   Press me
 </button>
 ```
