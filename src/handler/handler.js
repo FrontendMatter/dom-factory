@@ -92,24 +92,39 @@ export const handler = {
     if (config && (upgraded === null || upgraded.indexOf(id) === -1)) {
       upgraded = upgraded === null ? [] : upgraded.split(',')
       upgraded.push(id)
-      element.setAttribute('data-domfactory-upgraded', upgraded.join(','))
 
-      let component = factory(config.factory(element))
-      
-      const instanceConfig = Object.assign({}, config)
-      delete instanceConfig.factory
-      component[CONFIG_PROPERTY] = instanceConfig
+      let component
+      try {
+        component = factory(config.factory(element), element)
+      }
+      catch (e) {
+        console.error(id, e.message, e.stack)
+      }
 
-      this._created.push(component)
+      if (component) {
+        element.setAttribute('data-domfactory-upgraded', upgraded.join(','))
 
-      Object.defineProperty(element, toCamelCase(id), {
-        configurable: true,
-        writable: false,
-        value: component
-      })
+        const instanceConfig = Object.assign({}, config)
+        delete instanceConfig.factory
+        component[CONFIG_PROPERTY] = instanceConfig
 
-      config.callbacks.forEach(cb => cb(element))
-      component.fire('domfactory-component-upgraded')
+        this._created.push(component)
+
+        Object.defineProperty(element, toCamelCase(id), {
+          configurable: true,
+          writable: false,
+          value: component
+        })
+
+        config.callbacks.forEach(cb => cb(element))
+        component.fire('domfactory-component-upgraded')
+      }
+    }
+    else if (config) {
+      let component = element[toCamelCase(id)]
+      if (typeof component._reset === 'function') {
+        component._reset()
+      }
     }
   },
 

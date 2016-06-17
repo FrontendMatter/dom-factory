@@ -1,38 +1,9 @@
 import { watch, unwatch } from 'watch-object'
-
-const isElement = (el) => (el instanceof HTMLElement)
-
-const isArray = (obj) => ({}.toString.call(obj) === '[object Array]')
-
-const isFunction = (fn) => typeof fn === 'function'
-
-const toKebabCase = (str) => str.replace(/([A-Z])/g, ($1) => `-${ $1 }`.toLowerCase())
-
-/**
- * Assign descriptors
- * @param  {Object}    target
- * @param  {...Object} sources
- * @return {Object}
- */
-export const assign = (target, ...sources) => {
-  sources.forEach(source => {
-    if (!source) {
-      return
-    }
-    let descriptors = Object.keys(source).reduce((descriptors, key) => {
-      descriptors[key] = Object.getOwnPropertyDescriptor(source, key)
-      return descriptors
-    }, {})
-    Object.getOwnPropertySymbols(source).forEach(sym => {
-      let descriptor = Object.getOwnPropertyDescriptor(source, sym)
-      if (descriptor.enumerable) {
-        descriptors[sym] = descriptor
-      }
-    })
-    Object.defineProperties(target, descriptors)
-  })
-  return target
-}
+import { isElement } from '../util/isElement'
+import { isArray } from '../util/isArray'
+import { isFunction } from '../util/isFunction'
+import { toKebabCase } from '../util/toKebabCase'
+import { assign } from '../util/assign'
 
 /**
  * Set the default property options
@@ -130,6 +101,20 @@ const makeProperties = (src) => {
   }
 }
 
+const dotObject = (str, obj) => {
+  return str.split('.').reduce((o, i) => o[i], obj)
+}
+
+const dotObjectPropParent = (str, obj) => {
+  let dots = str.split('.')
+  let prop = dots.pop()
+  let parent = dotObject(dots.join('.'), obj)
+  return {
+    parent,
+    prop
+  }
+}
+
 /**
  * Get the configuration for observers
  * @param  {Object} src The source object
@@ -148,20 +133,6 @@ const observers = (src) => {
     }
   })
   .filter(({ fn }) => isFunction(src[fn]))
-}
-
-const dotObject = (str, obj) => {
-  return str.split('.').reduce((o, i) => o[i], obj)
-}
-
-const dotObjectPropParent = (str, obj) => {
-  let dots = str.split('.')
-  let prop = dots.pop()
-  let parent = dotObject(dots.join('.'), obj)
-  return {
-    parent,
-    prop
-  }
 }
 
 /**
@@ -204,8 +175,11 @@ const listeners = (src) => {
     }
   })
   .filter(({ element, fn }) => {
-    return isFunction(src[fn]) && 
-      (isElement(src[element]) || isElement(src[element]['element']))
+    return isFunction(src[fn]) && (
+      element === 'document' ||
+      element === 'window' ||
+      isElement(src[element]) || 
+      isElement(src[element]['element']))
   })
 }
 
@@ -216,23 +190,55 @@ const listeners = (src) => {
 const makeListeners = (src) => {
   listeners(src).forEach(({ element, fn, events }) => {
     src[fn] = src[fn].bind(src)
-    if (isElement(src[element])) {
+    if (element === 'document') {
+      element = src.element.ownerDocument
+    }
+    else if (element === 'window') {
+      element = window
+    }
+    else if (isElement(src[element])) {
       element = src[element]
     }
     else if (isElement(src[element]['element'])) {
       element = src[element]['element']
     }
-    events.forEach(e => element.addEventListener(e, src[fn]))
+    if (element) {
+      events.forEach(e => element.addEventListener(e, src[fn]))
+    }
   })
 }
 
-export const factory = (factory) => {
+/**
+ * Get mixins
+ * @param  {Object} src The source object
+ * @return {Array<Object>}
+ */
+const mixins = (src) => {
+  if (!isArray(src.mixins)) {
+    return []
+  }
+  return src.mixins.filter(mixin => typeof mixin === 'object')
+}
+
+/**
+ * Merge mixins
+ * @param  {Object} src The source object
+ */
+const makeMixins = (src) => {
+  const args = mixins(src)
+  args.unshift({})
+  return assign.apply(null, args)
+}
+
+export const factory = (factory, element) => {
   if (!factory || 
     typeof factory !== 'object' || 
-    !isElement(factory.element)) {
-    console.error('[dom-component] Invalid factory.')
+    !isElement(element)) {
+    console.error('[dom-factory] Invalid factory.', factory, element)
     return
   }
+
+  factory.element = element
 
   let component = {
 
@@ -268,7 +274,6 @@ export const factory = (factory) => {
     init () {
       makeObservers(this)
       makeListeners(this)
-
       if (isFunction(factory.init)) {
         factory.init.call(this)
       }
@@ -291,13 +296,21 @@ export const factory = (factory) => {
       })
 
       listeners(factory).forEach(({ element, fn, events }) => {
-        if (isElement(this[element])) {
+        if (element === 'document') {
+          element = this.element.ownerDocument
+        }
+        else if (element === 'window') {
+          element = window
+        }
+        else if (isElement(this[element])) {
           element = this[element]
         }
         else if (isElement(this[element]['element'])) {
           element = this[element]['element']
         }
-        events.forEach(e => element.removeEventListener(e, this[fn]))
+        if (element) {
+          events.forEach(e => element.removeEventListener(e, this[fn]))
+        }
       })
 
       if (isFunction(factory.destroy)) {
@@ -329,6 +342,7 @@ export const factory = (factory) => {
 
   component = assign(
     {},
+    makeMixins(factory),
     factory,
     component
   )
