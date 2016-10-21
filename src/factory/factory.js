@@ -31,7 +31,7 @@ const createProp = (prop, opts = {}, src) => {
     enumerable: true,
     configurable: true,
     writable: !opts.readOnly,
-    value: opts.value
+    value: isFunction(opts.value) ? opts.value.call(src) : opts.value
   }
   Object.defineProperty(src, prop, property)
 }
