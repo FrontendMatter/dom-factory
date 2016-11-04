@@ -1,6 +1,6 @@
 {
   "name": "dom-factory",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Enhance HTML elements using plain JavaScript objects.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
