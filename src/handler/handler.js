@@ -195,6 +195,8 @@ export const handler = {
       this.downgradeElement(node)
     }
   }
-}
+};
 
-window.addEventListener('load', () => handler.upgradeAll())
+['DOMContentLoaded', 'load'].forEach(function (e) {
+  window.addEventListener(e, () => handler.upgradeAll())
+})
