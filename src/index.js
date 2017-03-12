@@ -1,3 +1,5 @@
+require('core-js/modules/es6.array.find')
+
 export { factory } from './factory'
 export { handler } from './handler'
 

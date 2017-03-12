@@ -325,16 +325,31 @@ export const factory = (factory, element) => {
     fire (eventName) {
       let event
       if ('CustomEvent' in window && typeof window.CustomEvent === 'object') {
-        event = new CustomEvent(eventName, {
-          bubbles: true,
-          cancelable: false
-        })
+        try {
+          event = new CustomEvent(eventName, {
+            bubbles: true,
+            cancelable: false
+          }) 
+        } 
+        catch (e) {
+          event = new this.CustomEvent_(eventName, {
+            bubbles: true,
+            cancelable: false
+          })
+        }
       }
       else {
         event = document.createEvent('Event')
         event.initEvent(eventName, true, true)
       }
       this.element.dispatchEvent(event)
+    },
+
+    CustomEvent_ (event, params) {
+      params = params || { bubbles: false, cancelable: false, detail: undefined }
+      var evt = document.createEvent('CustomEvent')
+      evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail)
+      return evt
     }
   }
 
