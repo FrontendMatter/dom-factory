@@ -11,6 +11,12 @@ const CONFIG_PROPERTY = '__domFactoryConfig'
  */
 export const handler = {
 
+  autoInit () {
+    ['DOMContentLoaded', 'load'].forEach(function (e) {
+      window.addEventListener(e, () => handler.upgradeAll())
+    })
+  },
+
   // Registered components
   _registered: [],
 
@@ -24,11 +30,7 @@ export const handler = {
    */
   register (id, factory) {
     const callbacks = []
-    
-    let idChunks = id.split('-')
-    idChunks.splice(1, 0, 'js')
-    
-    const cssClass = idChunks.join('-')
+    const cssClass = `js-${ id }`
 
     if (!this.findRegistered(id)) {
       this._registered.push({
@@ -38,7 +40,6 @@ export const handler = {
         factory
       })
     }
-    this.upgrade(id)
   },
 
   /**
@@ -157,6 +158,7 @@ export const handler = {
    * @param  {Object} component
    */
   downgradeComponent (component) {
+    component.destroy()
     const index = this._created.indexOf(component)
     this._created.splice(index, 1)
     
@@ -172,14 +174,14 @@ export const handler = {
    * @param  {HTMLElement} element
    */
   downgradeElement (element) {
-    this.findCreated(element).forEach(this.downgradeComponent)
+    this.findCreated(element).forEach(this.downgradeComponent, this)
   },
 
   /**
    * Downgrade all the created components.
    */
   downgradeAll () {
-    this._created.forEach(this.downgradeComponent)
+    this._created.forEach(this.downgradeComponent, this)
   },
 
   /**
@@ -195,8 +197,4 @@ export const handler = {
       this.downgradeElement(node)
     }
   }
-};
-
-['DOMContentLoaded', 'load'].forEach(function (e) {
-  window.addEventListener(e, () => handler.upgradeAll())
-})
+}

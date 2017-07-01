@@ -50,11 +50,9 @@ A component definition is nothing more than a simple object factory (a function 
 ```js
 /**
  * A component definition
- * @param  {HTMLElement} element
  * @return {Object}
  */
-const buttonComponent = (element) => ({
-  element,
+const buttonComponent = () => ({
 
   /**
    * Properties part of the component's public API.
@@ -137,14 +135,43 @@ const buttonComponent = (element) => ({
 handler.register('my-button', buttonComponent)
 ```
 
-#### Initialize the component
+#### Initializing
 
-The component handler attempts to self-initialize all registered components which match the component CSS class. The CSS class is computed automatically from the component ID which was provided at registration.
+The component handler attempts to self-initialize all registered components which match the component CSS class. The CSS class is computed automatically from the component ID which was provided at registration, prefixed with `js-`.
 
-In this example, since we registered the `buttonComponent` with a component ID of `my-button`, the handler will try to initialize all the HTML elements which have the `my-js-button` CSS class.
+In this example, since we registered the `buttonComponent` with a component ID of `my-button`, the handler will try to initialize all the HTML elements which have the `js-my-button` CSS class.
 
 ```html
-<button class="my-js-button">Press me</button>
+<button class="js-my-button">Press me</button>
+```
+
+```js
+// Initialize all components on window.DOMContentLoaded and window.load events.
+handler.autoInit()
+```
+
+```js
+// Initialize all components immediately.
+handler.upgradeAll()
+
+// Initialize all components on a single element.
+var myButtonNode = document.querySelector('.js-my-button')
+handler.upgradeElement(myButtonNode)
+
+// Initialize a single component on a single element.
+handler.upgradeElement(myButtonNode, 'my-button')
+
+// Upgrade all elements matching a registered component ID.
+handler.upgrade('my-button')
+```
+
+#### Downgrade
+
+Sometimes we need component lifecycle control when integrating with other libraries (Vue.js, Angular, etc).
+
+```js
+var myButtonNode = document.querySelector('.js-my-button')
+handler.downgradeElement(myButtonNode)
 ```
 
 #### Interact with the component API
@@ -170,14 +197,19 @@ button.aProperty = 'something else'
 button.bProperty = true
 ```
 
-When using the `reflectToAttribute: true` property option, the property reflects a string representation of it's value to the corresponding attribute on the HTML element, which means you can use the attribute to target styles or to configure the property value.
+When using the `reflectToAttribute: true` property option, the property reflects a string representation of it's value to the corresponding attribute on the HTML element, which means you can use the HTML element attribute to configure the component instance property value.
 
 When using a `Boolean` property type and assigning a property value of `true`, the attribute will be created with the same value as the attribute name and when assigning a property value of `false`, the attribute will be removed from the DOM.
 
 ```html
-<button class="my-js-button" a-property="something else" b-property="b-property">
+<button class="js-my-button" a-property="something else" b-property="b-property">
   Press me
 </button>
+```
+
+```js
+console.log(button.aProperty) // => something else
+console.log(button.bProperty) // => b-property
 ```
 
 #### Destroy
