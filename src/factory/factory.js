@@ -65,18 +65,21 @@ const reflectToAttribute = (prop, opts = {}, src) => {
   if (!opts.reflectToAttribute) {
     return
   }
-  const propKebab = toKebabCase(prop)
+  const propKebab = toKebabCase(`data-${prop}`)
   const descriptor = Object.getOwnPropertyDescriptor(src, prop)
   const property = {
     enumerable: descriptor.enumerable,
     configurable: descriptor.configurable,
     get: function () {
       return opts.type === Boolean
-        ? this.element.hasAttribute(propKebab)
-        : this.element.getAttribute(propKebab)
+        ? this.element.dataset[prop] === ''
+        : this.element.dataset[prop]
     },
     set: function (value) {
-      this.element[value ? 'setAttribute' : 'removeAttribute'](propKebab, opts.type === Boolean ? prop : value)
+      if (opts.type === Boolean) {
+        return this.element[value ? 'setAttribute' : 'removeAttribute'](propKebab, opts.type === Boolean ? '' : value)
+      }
+      this.element.dataset[prop] = value
     }
   }
   Object.defineProperty(src, prop, property)

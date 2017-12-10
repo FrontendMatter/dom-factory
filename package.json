@@ -1,6 +1,6 @@
 {
   "name": "dom-factory",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.8",
   "description": "Enhance HTML elements using plain JavaScript objects.",
   "scripts": {
     "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
@@ -30,10 +30,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/themekit/dom-factory.git"
+    "url": "git+https://github.com/FrontendMatter/dom-factory.git"
   },
   "bugs": {
-    "url": "https://github.com/themekit/dom-factory/issues"
+    "url": "https://github.com/FrontendMatter/dom-factory/issues"
   },
-  "homepage": "https://github.com/themekit/dom-factory#readme"
+  "homepage": "https://github.com/FrontendMatter/dom-factory#readme"
 }

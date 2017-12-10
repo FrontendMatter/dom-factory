@@ -6,7 +6,15 @@ The DOM factory provides a convenient API (inspired by Polymer) to enhance HTML 
 
 ## Compatibility
 
-- Supports ES5-compliant browsers (IE9+)
+> Supports the last two versions of every major browser.
+
+- Chrome
+- Safari
+- Firefox
+- IE 11/Edge
+- Opera
+- Mobile Safari
+- Chrome on Android
 
 ## Installation
 
@@ -61,7 +69,7 @@ const buttonComponent = () => ({
   properties: {
 
     /**
-     * Maps to [a-property="value"] attribute
+     * Maps to [data-a-property="value"] attribute
      * Also sets a default property value 
      * and updates the attribute on the HTMLElement
      * @type {Object}
@@ -72,7 +80,7 @@ const buttonComponent = () => ({
     },
 
     /**
-     * Maps to [b-property] attribute
+     * Maps to [data-b-property] attribute
      * It removes the attribute when the property value is `false`
      * @type {Object}
      */
@@ -202,14 +210,14 @@ When using the `reflectToAttribute: true` property option, the property reflects
 When using a `Boolean` property type and assigning a property value of `true`, the attribute will be created with the same value as the attribute name and when assigning a property value of `false`, the attribute will be removed from the DOM.
 
 ```html
-<button class="js-my-button" a-property="something else" b-property="b-property">
+<button class="js-my-button" data-a-property="something else" data-b-property>
   Press me
 </button>
 ```
 
 ```js
 console.log(button.aProperty) // => something else
-console.log(button.bProperty) // => b-property
+console.log(button.bProperty) // => true
 ```
 
 #### Destroy
