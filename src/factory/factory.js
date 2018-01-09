@@ -43,7 +43,7 @@ const createProp = (prop, opts = {}, src) => {
  * @param  {Object} src   The source object
  */
 const propValue = (prop, value, src) => {
-  if (value !== 0 && (!value || !!src[prop])) {
+  if ((!value && value !== 0) || !!src[prop]) {
     return
   }
   if (isFunction(value)) {
