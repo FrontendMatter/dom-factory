@@ -85,8 +85,20 @@ const buttonComponent = () => ({
      * @type {Object}
      */
     bProperty: {
-      type: Boolean,
-      reflectToAttribute: true
+      reflectToAttribute: true,
+      type: Boolean
+    },
+
+    /**
+     * Maps to [data-c-property] attribute
+     * It casts the value to a Number
+     * Sets the initial value to 0
+     * @type {Object}
+     */
+    bProperty: {
+      reflectToAttribute: true,
+      type: Number,
+      value: 0
     }
   },
 
@@ -145,7 +157,7 @@ handler.register('my-button', buttonComponent)
 
 #### Initializing
 
-The component handler attempts to self-initialize all registered components which match the component CSS class. The CSS class is computed automatically from the component ID which was provided at registration, prefixed with `js-`.
+When calling the `autoInit()` method, the component handler attempts to self-initialize all registered components which match the component CSS class. The CSS class is computed automatically from the component ID which was provided at registration, prefixed with `js-`.
 
 In this example, since we registered the `buttonComponent` with a component ID of `my-button`, the handler will try to initialize all the HTML elements which have the `js-my-button` CSS class.
 
@@ -157,6 +169,8 @@ In this example, since we registered the `buttonComponent` with a component ID o
 // Initialize all components on window.DOMContentLoaded and window.load events.
 handler.autoInit()
 ```
+
+You can also initialize components manually.
 
 ```js
 // Initialize all components immediately.
@@ -203,21 +217,28 @@ console.log(button.aProperty)
 ```js
 button.aProperty = 'something else'
 button.bProperty = true
+button.cProperty = 5
 ```
 
 When using the `reflectToAttribute: true` property option, the property reflects a string representation of it's value to the corresponding attribute on the HTML element, which means you can use the HTML element attribute to configure the component instance property value.
 
 When using a `Boolean` property type and assigning a property value of `true`, the attribute will be created with the same value as the attribute name and when assigning a property value of `false`, the attribute will be removed from the DOM.
 
+You can also cast the property value to a `Number` by adding `type: Number` to the property definition.
+
 ```html
-<button class="js-my-button" data-a-property="something else" data-b-property>
+<button class="js-my-button" 
+  data-a-property="something else" 
+  data-b-property
+  data-c-property="13">
   Press me
 </button>
 ```
 
 ```js
-console.log(button.aProperty) // => something else
+console.log(button.aProperty) // => 'something else'
 console.log(button.bProperty) // => true
+console.log(button.cProperty) // => 13
 ```
 
 #### Destroy

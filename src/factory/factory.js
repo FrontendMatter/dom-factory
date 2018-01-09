@@ -43,7 +43,7 @@ const createProp = (prop, opts = {}, src) => {
  * @param  {Object} src   The source object
  */
 const propValue = (prop, value, src) => {
-  if (!value || !!src[prop]) {
+  if (value !== 0 && (!value || !!src[prop])) {
     return
   }
   if (isFunction(value)) {
@@ -71,13 +71,18 @@ const reflectToAttribute = (prop, opts = {}, src) => {
     enumerable: descriptor.enumerable,
     configurable: descriptor.configurable,
     get: function () {
-      return opts.type === Boolean
-        ? this.element.dataset[prop] === ''
-        : this.element.dataset[prop]
+      if (opts.type === Boolean) {
+        return this.element.dataset[prop] === ''
+      }
+      if (opts.type === Number) {
+        return Number(this.element.dataset[prop])
+      }
+      return this.element.dataset[prop]
     },
     set: function (value) {
-      if (opts.type === Boolean) {
-        return this.element[value ? 'setAttribute' : 'removeAttribute'](propKebab, opts.type === Boolean ? '' : value)
+      const removable = !value && value !== 0
+      if (opts.type === Boolean || removable) {
+        return this.element[!removable ? 'setAttribute' : 'removeAttribute'](propKebab, opts.type === Boolean ? '' : value)
       }
       this.element.dataset[prop] = value
     }
