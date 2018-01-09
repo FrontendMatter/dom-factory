@@ -95,7 +95,7 @@ const buttonComponent = () => ({
      * Sets the initial value to 0
      * @type {Object}
      */
-    bProperty: {
+    cProperty: {
       reflectToAttribute: true,
       type: Number,
       value: 0
@@ -220,11 +220,39 @@ button.bProperty = true
 button.cProperty = 5
 ```
 
-When using the `reflectToAttribute: true` property option, the property reflects a string representation of it's value to the corresponding attribute on the HTML element, which means you can use the HTML element attribute to configure the component instance property value.
+When using the `reflectToAttribute: true` property option, the property reflects a string representation of it's value to the corresponding `data-*` attribute on the HTML element using the `dataset` API, which means you can use the HTML element attribute to configure the property value.
 
-When using a `Boolean` property type and assigning a property value of `true`, the attribute will be created with the same value as the attribute name and when assigning a property value of `false`, the attribute will be removed from the DOM.
+#### Casting values
 
-You can also cast the property value to a `Number` by adding `type: Number` to the property definition.
+Because component properties using `reflectToAttribute: true` are using the dataset API, all values are strings by default, but you can cast them to `Boolean` or `Number`.
+
+> Boolean
+
+When using a `Boolean` property type and assigning a property value of `true`, the attribute will be created on the HTML element with an empty value and when assigning a property value of `false`, the attribute will be removed from the DOM. 
+
+For example, an attribute with an empty value called `[data-my-boolean-attribute]` will map to `button.myBooleanAttribute`.
+
+```html
+<button data-my-boolean-attribute class="js-my-button">
+  Press me
+</button>
+```
+
+```js
+`console.log(button.myBooleanAttribute) // => true`
+```
+
+> Number
+
+Cast the component property value to a `Number` by adding `type: Number` to the property definition. It returns `NaN` when the value is not a valid number.
+
+```js
+button.cProperty = '50'
+console.log(button.cProperty) // => 50
+
+button.cProperty = 'abc'
+console.log(button.cProperty) // => NaN
+```
 
 ```html
 <button class="js-my-button" 
