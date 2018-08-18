@@ -1,6 +1,6 @@
 {
   "name": "dom-factory",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0",
   "description": "Enhance HTML elements using plain JavaScript objects.",
   "scripts": {
     "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
@@ -13,7 +13,7 @@
   "devDependencies": {
     "core-js": "^2.4.1",
     "cross-env": "^5.0.1",
-    "laravel-mix": "^1.0.7",
+    "laravel-mix": "^2.0.0",
     "watch-object": "^1.1.2"
   },
   "dependencies": {},
