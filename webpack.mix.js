@@ -1,4 +1,4 @@
-const { mix } = require('laravel-mix')
+const mix = require('laravel-mix')
 
 mix.js('src/index.js', 'dist/dom-factory.js')
 
