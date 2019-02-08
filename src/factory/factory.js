@@ -187,7 +187,7 @@ const listeners = (src) => {
       element === 'document' ||
       element === 'window' ||
       isElement(src[element]) || 
-      isElement(src[element]['element']))
+      (src[element] && isElement(src[element]['element']) ))
   })
 }
 
