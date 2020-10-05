@@ -1,5 +1,3 @@
-require('core-js/modules/es6.symbol')
-
 export { factory } from './factory'
 export { handler } from './handler'
 
